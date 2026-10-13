@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://media.pollinations.ai https://raw.githubusercontent.com; media-src 'self' blob:; connect-src 'self' https://gen.pollinations.ai https://enter.pollinations.ai https://media.pollinations.ai; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>Prompt Brawl — describe a fighter, watch it battle</title>
+<meta name="description" content="Describe a fighter in one line. The AI brings it to life and sends it into a commentated battle. Climb the ladder, beat the daily boss, share your fights.">
+<meta name="theme-color" content="#14101f">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Prompt Brawl — describe a fighter, watch it battle">
+<meta property="og:description" content="One line in, one legendary fight out. Clever descriptions win.">
+<meta property="og:image" content="https://lotxo1.github.io/prompt-brawl/og-image.png">
+<meta property="og:url" content="https://lotxo1.github.io/prompt-brawl/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://lotxo1.github.io/prompt-brawl/">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script defer src="game.js"></script>
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="./" aria-label="Prompt Brawl home"><img src="icon.svg" alt="" width="32" height="32"><span>Prompt Brawl</span></a>
+  <div class="top-right">
+    <span id="balance" class="chip hidden" title="Your Pollen balance"></span>
+    <button id="voiceBtn" class="icon-btn" type="button" aria-pressed="false" data-i18n-title="voiceTitle">🔇</button>
+    <button id="langBtn" class="icon-btn" type="button" data-i18n-title="langTitle">ES</button>
+    <button id="signOutBtn" class="ghost-btn hidden" type="button" data-i18n="signOut">Sign out</button>
+  </div>
+</header>
+
+<main>
+  <!-- Landing -->
+  <section id="home" class="view">
+    <div class="hero">
+      <h1 data-i18n="heroTitle">Describe a fighter in one line. Watch it brawl.</h1>
+      <p class="lead" data-i18n="heroLead">The AI designs your fighter from that line (look, moves, quirks and weaknesses) and throws it into a commentated battle. Clever descriptions win.</p>
+      <div class="hero-actions">
+        <button id="signInBtn" class="big-btn" type="button" data-i18n="signIn">Sign in with Pollinations</button>
+        <button id="demoBtn" class="ghost-btn" type="button" data-i18n="watchDemo">▶ Watch a demo fight</button>
+      </div>
+      <p class="fine" data-i18n="heroFine">Free to play with your Pollinations account: new accounts get free Pollen, and a fight costs about 0.01 Pollen. You pay with your own Pollen; nobody else's key runs dry.</p>
+      <button id="heroArt" class="hero-art hidden" type="button" data-i18n-title="watchDemo"></button>
+    </div>
+    <ol class="steps">
+      <li><b data-i18n="step1t">Write one line</b><span data-i18n="step1d">“A grandma with a cast-iron frying pan who never loses her cool.”</span></li>
+      <li><b data-i18n="step2t">Meet your fighter</b><span data-i18n="step2d">A trading card with a portrait, stats, three moves, a quirk and a weakness.</span></li>
+      <li><b data-i18n="step3t">Brawl and climb</b><span data-i18n="step3d">Beat six challengers, face the daily boss and share your best fights.</span></li>
+    </ol>
+  </section>
+
+  <!-- Create a fighter -->
+  <section id="create" class="view hidden">
+    <h2 data-i18n="createTitle">Who's stepping into the arena?</h2>
+    <form id="createForm" class="create-form" autocomplete="off">
+      <label for="lineInput" class="sr-only" data-i18n="lineLabel">Describe your fighter in one line</label>
+      <input id="lineInput" type="text" maxlength="140" required data-i18n-placeholder="linePlaceholder" placeholder="A grandma with a cast-iron frying pan who never loses her cool">
+      <button id="diceBtn" class="icon-btn" type="button" data-i18n-title="diceTitle">🎲</button>
+      <button id="createBtn" class="big-btn" type="submit" data-i18n="create">Bring it to life</button>
+    </form>
+    <p class="fine" data-i18n="createFine">Specific beats generic: give it a job, a habit, a fear or a weird item.</p>
+    <div id="createStatus" class="status hidden" role="status"></div>
+  </section>
+
+  <!-- Fighter + opponents -->
+  <section id="lobby" class="view hidden">
+    <div class="lobby-grid">
+      <div>
+        <div id="myCard"></div>
+        <div class="row">
+          <button id="newFighterBtn" class="ghost-btn" type="button" data-i18n="newFighter">✏️ New fighter</button>
+          <span id="record" class="fine"></span>
+        </div>
+      </div>
+      <div>
+        <h2 data-i18n="ladderTitle">The ladder</h2>
+        <ol id="ladder" class="ladder"></ol>
+        <h2 data-i18n="bossTitle">Daily boss</h2>
+        <div id="boss"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Arena -->
+  <section id="arena" class="view hidden">
+    <div class="versus">
+      <div id="sideA"></div>
+      <div class="vs">VS</div>
+      <div id="sideB"></div>
+    </div>
+    <div id="arenaStatus" class="status hidden" role="status"></div>
+    <ol id="feed" class="feed" aria-live="polite"></ol>
+    <div class="arena-controls">
+      <button id="skipBtn" class="ghost-btn hidden" type="button" data-i18n="skip">⏩ Skip</button>
+    </div>
+    <div id="result" class="result hidden">
+      <div class="ko">K.O.!</div>
+      <p id="winnerLine" class="finale"></p>
+      <p id="finale" class="callout"></p>
+      <p id="keyMoment" class="fine"></p>
+      <div class="row center">
+        <button id="shareBtn" class="big-btn" type="button" data-i18n="share">🔗 Share this fight</button>
+        <button id="nextBtn" class="ghost-btn" type="button"></button>
+        <button id="backBtn" class="ghost-btn" type="button" data-i18n="back">← Back</button>
+      </div>
+      <div id="replayCta" class="replay-cta hidden">
+        <p data-i18n="replayCta">Think you can write a better fighter?</p>
+        <button id="ctaBtn" class="big-btn" type="button" data-i18n="ctaBtn">Make your own fighter</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <a href="https://pollinations.ai/?ref=badge" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/pollinations/pollinations/main/packages/ui/src/brand/badge-made-with.svg" alt="Made with pollinations.ai" height="28"></a>
+  <a href="https://github.com/lotxo1/prompt-brawl" target="_blank" rel="noopener" data-i18n="source">Source on GitHub</a>
+</footer>
+
+<div id="toast" class="toast hidden" role="alert"></div>
+</body>
+</html>
